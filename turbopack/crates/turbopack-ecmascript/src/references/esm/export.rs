@@ -41,6 +41,12 @@ use crate::{
 #[derive(Clone, Hash, Debug, PartialEq, Eq, Serialize, Deserialize, TraceRawVcs)]
 pub struct EsIdent(pub RcStr, #[turbo_tasks(trace_ignore)] pub SyntaxContext);
 
+impl EsIdent {
+    pub fn to_swc_ident(&self) -> Ident {
+        Ident::new((*self.0).into(), DUMMY_SP, self.1)
+    }
+}
+
 #[derive(Clone, Hash, Debug, PartialEq, Eq, Serialize, Deserialize, TraceRawVcs)]
 pub enum EsmExport {
     /// A local binding that is exported (export { a } or export const a = 1)
@@ -133,7 +139,7 @@ pub struct FollowExportsResult {
 #[turbo_tasks::function]
 pub async fn follow_reexports(
     module: ResolvedVc<Box<dyn EcmascriptChunkPlaceable>>,
-    export_name: RcStr,
+    export_name: EsIdent,
     side_effect_free_packages: Vc<Glob>,
     ignore_side_effect_of_entry: bool,
 ) -> Result<Vc<FollowExportsResult>> {
