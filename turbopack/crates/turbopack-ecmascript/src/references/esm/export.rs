@@ -7,7 +7,7 @@ use std::{
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use swc_core::{
-    common::DUMMY_SP,
+    common::{SyntaxContext, DUMMY_SP},
     ecma::ast::{
         AssignTarget, ComputedPropName, Expr, ExprStmt, Ident, KeyValueProp, Lit, MemberExpr,
         MemberProp, ObjectLit, Prop, PropName, PropOrSpread, SimpleAssignTarget, Stmt, Str,
@@ -39,11 +39,16 @@ pub enum EsmExport {
     /// A local binding that is exported (export { a } or export const a = 1)
     ///
     /// The last bool is true if the binding is a mutable binding
-    LocalBinding(RcStr, bool),
+    LocalBinding(RcStr, #[turbo_tasks(trace_ignore)] SyntaxContext, bool),
     /// An imported binding that is exported (export { a as b } from "...")
     ///
     /// The last bool is true if the binding is a mutable binding
-    ImportedBinding(Vc<Box<dyn ModuleReference>>, RcStr, bool),
+    ImportedBinding(
+        Vc<Box<dyn ModuleReference>>,
+        RcStr,
+        #[turbo_tasks(trace_ignore)] SyntaxContext,
+        bool,
+    ),
     /// An imported namespace that is exported (export * from "...")
     ImportedNamespace(Vc<Box<dyn ModuleReference>>),
     /// An error occurred while resolving the export
@@ -498,7 +503,7 @@ impl CodeGenerateable for EsmExports {
                 EsmExport::Error => Some(quote!(
                     "(() => { throw new Error(\"Failed binding. See build errors!\"); })" as Expr,
                 )),
-                EsmExport::LocalBinding(name, mutable) => {
+                EsmExport::LocalBinding(name, ctxt, mutable) => {
                     let local = if name == "default" {
                         Cow::Owned(magic_identifier::mangle("default export"))
                     } else {
@@ -507,7 +512,7 @@ impl CodeGenerateable for EsmExports {
                     if *mutable {
                         Some(quote!(
                             "([() => $local, ($new) => $local = $new])" as Expr,
-                            local = Ident::new(local.into(), DUMMY_SP, Default::default()),
+                            local = Ident::new(local.into(), DUMMY_SP, *ctxt),
                             new = Ident::new(
                                 format!("new_{name}").into(),
                                 DUMMY_SP,
