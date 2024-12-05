@@ -34,21 +34,23 @@ use crate::{
     magic_identifier,
 };
 
+/// EsIdent represents an identifier in ECMAScript module.
+///
+/// This type exists because an identifier in SWC consists of a symbol and a syntax context
+/// ([SyntaxContext]) that distinguishes variables with the same symbol.
+#[derive(Clone, Hash, Debug, PartialEq, Eq, Serialize, Deserialize, TraceRawVcs)]
+pub struct EsIdent(pub RcStr, #[turbo_tasks(trace_ignore)] pub SyntaxContext);
+
 #[derive(Clone, Hash, Debug, PartialEq, Eq, Serialize, Deserialize, TraceRawVcs)]
 pub enum EsmExport {
     /// A local binding that is exported (export { a } or export const a = 1)
     ///
     /// The last bool is true if the binding is a mutable binding
-    LocalBinding(RcStr, #[turbo_tasks(trace_ignore)] SyntaxContext, bool),
+    LocalBinding(EsIdent, bool),
     /// An imported binding that is exported (export { a as b } from "...")
     ///
     /// The last bool is true if the binding is a mutable binding
-    ImportedBinding(
-        Vc<Box<dyn ModuleReference>>,
-        RcStr,
-        #[turbo_tasks(trace_ignore)] SyntaxContext,
-        bool,
-    ),
+    ImportedBinding(Vc<Box<dyn ModuleReference>>, EsIdent, bool),
     /// An imported namespace that is exported (export * from "...")
     ImportedNamespace(Vc<Box<dyn ModuleReference>>),
     /// An error occurred while resolving the export
@@ -124,7 +126,7 @@ pub enum FoundExportType {
 #[turbo_tasks::value]
 pub struct FollowExportsResult {
     pub module: ResolvedVc<Box<dyn EcmascriptChunkPlaceable>>,
-    pub export_name: Option<RcStr>,
+    pub export_name: Option<EsIdent>,
     pub ty: FoundExportType,
 }
 
@@ -503,7 +505,7 @@ impl CodeGenerateable for EsmExports {
                 EsmExport::Error => Some(quote!(
                     "(() => { throw new Error(\"Failed binding. See build errors!\"); })" as Expr,
                 )),
-                EsmExport::LocalBinding(name, ctxt, mutable) => {
+                EsmExport::LocalBinding(name, mutable) => {
                     let local = if name == "default" {
                         Cow::Owned(magic_identifier::mangle("default export"))
                     } else {
@@ -512,9 +514,9 @@ impl CodeGenerateable for EsmExports {
                     if *mutable {
                         Some(quote!(
                             "([() => $local, ($new) => $local = $new])" as Expr,
-                            local = Ident::new(local.into(), DUMMY_SP, *ctxt),
+                            local = Ident::new(local.into(), DUMMY_SP, name.1),
                             new = Ident::new(
-                                format!("new_{name}").into(),
+                                format!("new_{}", name.0).into(),
                                 DUMMY_SP,
                                 Default::default()
                             ),
