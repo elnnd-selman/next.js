@@ -195,7 +195,7 @@ describe('middleware - development errors', () => {
       })
       expect(stripAnsi(next.cliOutput)).toContain(
         isTurbopack
-          ? '\n ⨯ middleware.js (3:13) @ Object.__TURBOPACK__module__evaluation__' +
+          ? '\n ⨯ middleware.js (3:13)' +
               '\n ⨯ Error: booooom!' +
               '\n    at <unknown> (./middleware.js:3:13)'
           : '\n ⨯ Error: booooom!' +

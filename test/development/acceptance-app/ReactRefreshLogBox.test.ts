@@ -1191,7 +1191,7 @@ export default function Home() {
 
     if (isTurbopack) {
       expect(source).toMatchInlineSnapshot(`
-        "app/utils.ts (1:7) @ Object.{module evaluation}
+        "app/utils.ts (1:7)
 
         > 1 | throw new Error('utils error')
             |       ^
@@ -1211,9 +1211,7 @@ export default function Home() {
 
     if (isTurbopack) {
       // FIXME: display the sourcemapped stack frames
-      expect(stackFrames).toMatchInlineSnapshot(
-        `"at Object.{module evaluation} (app/page.js (2:1))"`
-      )
+      expect(stackFrames).toMatchInlineSnapshot(`"at (app/page.js (2:1))"`)
     } else {
       // FIXME: Webpack stack frames are not source mapped
       expect(stackFrames).toMatchInlineSnapshot(`
