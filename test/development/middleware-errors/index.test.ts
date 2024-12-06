@@ -195,9 +195,9 @@ describe('middleware - development errors', () => {
       })
       expect(stripAnsi(next.cliOutput)).toContain(
         isTurbopack
-          ? '\n ⨯ middleware.js (3:13) @ [project]/middleware.js [middleware] (ecmascript)' +
+          ? '\n ⨯ middleware.js (3:13) @ Object.__TURBOPACK__module__evaluation__' +
               '\n ⨯ Error: booooom!' +
-              '\n    at <unknown> ([project]/middleware.js [middleware] (ecmascript) (./middleware.js:3:13)'
+              '\n    at <unknown> (./middleware.js:3:13)'
           : '\n ⨯ Error: booooom!' +
               // TODO: Should be anonymous method without a method name
               '\n    at <unknown> (middleware.js:3)' +
