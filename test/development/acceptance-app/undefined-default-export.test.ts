@@ -61,8 +61,8 @@ describe('Undefined default export', () => {
     await browser.waitForElementByCss('#__next')
 
     await session.assertHasRedbox({
-      // TODO: really?
-      fixmeStackFramesHaveBrokenSourcemaps: true,
+      // TODO: Unclear why the test is navigating to the page twice
+      pageResponseCode: [500, 500],
     })
     expect(await session.getRedboxDescription()).toInclude(
       'The default export is not a React Component in "/page"'
