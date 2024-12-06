@@ -93,6 +93,7 @@ import { normalizeMetadataPageToRoute } from '../../../lib/metadata/get-metadata
 import { createEnvDefinitions } from '../experimental/create-env-definitions'
 import { JsConfigPathsPlugin } from '../../../build/webpack/plugins/jsconfig-paths-plugin'
 import { store as consoleStore } from '../../../build/output/store'
+import { isHiddenMethodName } from '../../../shared/lib/stack-trace-utils'
 
 export type SetupOpts = {
   renderServer: LazyRenderServerInstance
@@ -1174,7 +1175,7 @@ async function traceTurbopackErrorStack(
         }
 
         let line = '    at'
-        if (f.methodName != null) {
+        if (f.methodName != null && !isHiddenMethodName(f.methodName)) {
           line += ' ' + f.methodName
         }
 

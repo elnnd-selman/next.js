@@ -130,7 +130,7 @@ describe('middleware - development errors', () => {
         // In CI, it prefixes "Dynamic Code Evaluation".
         expect(stripAnsi(next.cliOutput)).toContain(
           '\n ⚠ middleware.js (3:22) @ __TURBOPACK__default__export__' +
-            '\n ⨯ middleware.js (4:9) @ eval'
+            '\n ⨯ middleware.js (4:9)'
         )
       }
       expect(stripAnsi(next.cliOutput)).toContain(
@@ -150,7 +150,7 @@ describe('middleware - development errors', () => {
           ? "\n ⚠ Error: Dynamic Code Evaluation (e. g. 'eval', 'new Function') not allowed in Edge Runtime" +
               '\nLearn More: https://nextjs.org/docs/messages/edge-dynamic-code-evaluation' +
               '\n    at __TURBOPACK__default__export__ (./middleware.js:3:22)'
-          : '\n ⚠ middleware.js (4:9) @ eval' +
+          : '\n ⚠ middleware.js (4:9)' +
               "\n ⚠ Dynamic Code Evaluation (e. g. 'eval', 'new Function') not allowed in Edge Runtime" +
               '\nLearn More: https://nextjs.org/docs/messages/edge-dynamic-code-evaluation'
       )

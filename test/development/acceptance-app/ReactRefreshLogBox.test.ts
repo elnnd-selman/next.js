@@ -1200,7 +1200,7 @@ export default function Home() {
       `)
     } else {
       expect(source).toMatchInlineSnapshot(`
-        "app/utils.ts (1:7) @ eval
+        "app/utils.ts (1:7)
 
         > 1 | throw new Error('utils error')
             |       ^
